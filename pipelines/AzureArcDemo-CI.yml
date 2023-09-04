@@ -1,0 +1,47 @@
+name : WindowsDeveloperArcDemo-CI
+trigger:
+  branches:
+    include:
+      - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:  
+  BuildNumber: $(GitVersion.FullSemVer)
+  ContainerRegistry: Acr # DockerHubConnection
+  Repository: windowsdeveloperarcdemo # 'wolfgangofner/windowsdeveloperarcdemo'
+
+stages:
+- stage: Build
+  jobs:  
+  - job: Build
+    displayName: Build and push Docker image to Container Registry
+    steps:
+      - task: gitversion/setup@0
+        displayName: Install GitVersion
+        inputs:
+          versionSpec: '5.x'
+
+      - task: gitversion/execute@0
+        displayName: Determine Version
+
+      - task: Docker@2
+        displayName: 'Build Docker Container'
+        inputs:
+          containerRegistry: $(ContainerRegistry)
+          repository: $(Repository)
+          command: 'build'
+          Dockerfile: '**/WindowsDeveloperArcDemo/Dockerfile'
+          buildContext: .
+          tags: |
+            $(BuildNumber)
+
+      - task: Docker@2
+        displayName: 'Push Docker Container'
+        inputs:
+          containerRegistry: $(ContainerRegistry)
+          repository: $(Repository)
+          command: 'push'
+          tags: |
+            $(BuildNumber)

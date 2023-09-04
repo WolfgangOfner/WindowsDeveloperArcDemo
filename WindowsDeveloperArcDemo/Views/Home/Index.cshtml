@@ -1,0 +1,7 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h3>The environment variable is: <b>@(Environment.GetEnvironmentVariable("SecretValue") ?? "Error! Variable not set.")</b></h3>
+</div>
